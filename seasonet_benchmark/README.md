@@ -1,0 +1,182 @@
+# SeasoNet Benchmark
+
+This folder contains the SeasoNet implementation used in the first part of the urban settlement indices benchmark. This implementation is focused on the SeasoNet Sentinel-2 dataset and is used to reproduce the multispectral index experiments across the five seasonal subsets.
+
+The SeasoNet part of the benchmark is sensor aware. Since SeasoNet is based on Sentinel-2 Level-2A imagery, only the indices that can be calculated from Sentinel-2 multispectral bands are implemented here. Panchromatic, thermal, nighttime light, and fusion based indices are not included in this folder because those inputs are not available in Sentinel-2.
+
+## Folder structure
+
+```text
+seasonet_benchmark/
+├── Results/
+├── scripts/
+├── README.md
+└── requirements.txt
+```
+
+## Environment
+
+All scripts in this folder were run using Python 3.10.16.
+
+The required Python packages are listed in `requirements.txt`:
+
+```text
+pandas==2.2.3
+rasterio==1.4.3
+matplotlib==3.10.0
+numpy==1.26.4
+scikit-learn==1.6.1
+scikit-image==0.24.0
+seaborn==0.13.2
+tqdm==4.67.1
+scipy==1.10.1
+```
+
+To create a clean environment, install the dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Dataset
+
+The SeasoNet dataset contains Sentinel-2 image patches and a `meta.csv` file. After downloading the dataset, the expected dataset structure contains the metadata file and five seasonal folders.
+
+```text
+SeasoNet/
+├── meta.csv
+├── fall/
+├── winter/
+├── snow/
+├── spring/
+└── summer/
+```
+
+The benchmark uses the five seasonal subsets separately. This makes it possible to compare how each multispectral urban settlement index behaves under different seasonal conditions.
+
+## Scripts folder
+
+The `scripts/` folder contains the code used for metadata filtering and season wise index implementation.
+
+```text
+scripts/
+├── Filtered_CSV_Creation_For_Seasons.py
+├── fall_code/
+├── winter_code/
+├── snow_code/
+├── spring_code/
+└── summer_code/
+```
+
+The season folders contain the scripts used to calculate the multispectral urban settlement indices for each season.
+
+## Creating filtered seasonal CSV files
+
+The first step is to create a filtered CSV file for each season. This is done using:
+
+```text
+Filtered_CSV_Creation_For_Seasons.py
+```
+
+This script reads the main SeasoNet `meta.csv` file, selects the required season, and creates a new CSV file for that season. It also keeps only those samples where both urban and non urban classes are present in the `Classes` column.
+
+The class grouping used in this implementation is:
+
+```text
+Urban classes: 1, 2, 3, 4, 5, 6, 10, 11
+Non urban classes: 7, 8, 9, 12 to 33
+```
+
+This filtering is important because the benchmark is based on built and non built separation. Samples that contain both groups are more useful for evaluating urban settlement indices because the index has to separate urban pixels from surrounding non urban pixels.
+
+### What the filtering script does
+
+The filtering script performs these steps:
+
+1. Reads the SeasoNet `meta.csv` file with pandas.
+2. Prints the column names so the metadata structure can be checked.
+3. Uses the `Season` column to find the selected season.
+4. Uses the `Classes` column to read the class labels available in each patch.
+5. Defines urban and non urban class groups.
+6. Selects only the rows that belong to the selected season.
+7. Keeps only the rows where the patch contains at least one urban class and at least one non urban class.
+8. Saves the filtered rows into a new season specific CSV file.
+
+The paths inside the script should be changed according to the local dataset location:
+
+```python
+meta_file = r"D:\Work\SeasoNet\meta.csv"
+output_file = r"D:\Work\SeasoNet\filtered_winter_meta_with_both_urban_nonurban.csv"
+```
+
+For another season, change the season keyword and output filename. The same process is repeated for fall, winter, snow, spring, and summer.
+
+## Index implementation
+
+After creating the filtered CSV files, the season specific scripts can be used to compute the multispectral indices.
+
+This folder implements the Sentinel-2 compatible part of the full benchmark. These indices use bands such as visible, near infrared, red edge, and shortwave infrared bands. The full study contains 46 urban settlement indices, but only 25 multispectral indices are used in the SeasoNet benchmark because Sentinel-2 does not provide panchromatic, thermal infrared, or nighttime light bands.
+
+The general processing flow is:
+
+```text
+Load filtered seasonal CSV
+        ↓
+Read Sentinel-2 patch and label data
+        ↓
+Prepare the required bands
+        ↓
+Calculate the selected multispectral index
+        ↓
+Apply thresholding to create a binary built mask
+        ↓
+Compare the prediction with the ground truth mask
+        ↓
+Save metrics and visual outputs
+```
+
+## Results folder
+
+The `Results/` folder contains the output images and result files generated by the season wise scripts.
+
+Each visual result contains four panels:
+
+```text
+(a) RGB image
+(b) Index output
+(c) Ground truth mask
+(d) Overlay
+```
+
+The RGB image shows the original Sentinel-2 patch. The index output shows the response or binary output of the selected urban settlement index. The ground truth mask shows the reference land cover labels. The overlay shows how the predicted built area matches the ground truth classes.
+
+Example result format:
+
+```text
+Results/
+├── fall_results/
+├── winter_results/
+├── snow_results/
+├── spring_results/
+└── summer_results/
+```
+
+The exact result folder names may be different depending on how the scripts save the outputs.
+
+## Reproduction steps
+
+1. Download the SeasoNet dataset.
+2. Place the dataset locally with `meta.csv` and the five season folders.
+3. Create a Python 3.10.16 environment.
+4. Install the required packages using `requirements.txt`.
+5. Update the paths inside `Filtered_CSV_Creation_For_Seasons.py`.
+6. Run the filtering script once for each season.
+7. Run the index scripts inside each season specific code folder.
+8. Check the generated metrics and images inside `Results/`.
+
+## Notes
+
+This folder is only for the SeasoNet Sentinel-2 implementation. It should not be used for panchromatic, thermal, nighttime light, or fusion based indices because those inputs are not available in the SeasoNet dataset.
+
+The ROI implementation in the main repository is used for the full index catalogue. That part uses Landsat-8, VIIRS, and Dynamic World so that the remaining index families can also be evaluated.
+
