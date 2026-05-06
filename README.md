@@ -285,11 +285,3 @@ The SeasoNet benchmark is useful for testing Sentinel-2 compatible indices acros
 
 Dynamic World is used as a reference source in the ROI benchmark. It is useful for reproducibility, but it should be treated as a proxy reference rather than perfect ground truth.
 
-## Citation
-
-If this repository is used, please cite the related paper once the final citation information is available.
-
-```text
-Khan, M. A. A., Younas, J., Dengel, A., Ahmed, S., Faraz, M. M., and Malik, M. I.
-Benchmarking Urban Settlement Indices Across Sentinel-2, Landsat-8, and VIIRS.
-```
