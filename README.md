@@ -1,5 +1,8 @@
 # Urban Settlement Indices Benchmark
 
+[![DOI](https://zenodo.org/badge/1231184628.svg)](https://doi.org/10.5281/zenodo.20057846)
+
+
 This repository contains the code and supplementary material for benchmarking urban settlement indices across Sentinel-2, Landsat-8, and VIIRS data. The goal of this repository is to make the experiments reproducible and to provide a clear structure for running both benchmark implementations.
 
 The benchmark is sensor aware. Not every index can be calculated from every satellite sensor, so the repository is divided into two main implementations. The SeasoNet benchmark evaluates the Sentinel-2 compatible multispectral indices across five seasons. The ROI benchmark evaluates the full catalogue of 46 urban settlement indices using Landsat-8, VIIRS nighttime lights, and Dynamic World labels.
